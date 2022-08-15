@@ -1,14 +1,30 @@
+export type GameSettings = {
+  screenWidth: number
+  screenHeight: number
+  gameCameraZoom: number
+  fieldWidthMid: number
+  fieldWidth3Quarters: number
+  fieldWidth1Quarter: number
+  fieldHeightMid: number
+  fieldHeight3Quarters: number
+  fieldHeight1Quarter: number
+  worldBoundWidth: number
+  worldBoundHeight: number
+}
+
+export type GameState = {
+  numDeaths: number
+}
+
 const baseWorldSettings = {
   screenWidth: 1024,
   screenHeight: 768,
   gameCameraZoom: 1
 }
 
-export const gameSettings = {
-  playerLives: 3
-}
+export const gameState: GameState = { numDeaths: 0 }
 
-export const worldSettings = {
+export const gameSettings: GameSettings = {
   ...baseWorldSettings,
   fieldWidthMid: baseWorldSettings.screenWidth / 2,
   fieldWidth3Quarters: baseWorldSettings.screenWidth - baseWorldSettings.screenWidth / 4,

@@ -2,12 +2,18 @@ import * as Phaser from 'phaser'
 import { StateManager } from './types'
 
 export abstract class StateContainer<
+  TGameSettings extends Record<string, any>,
+  TGameState extends Record<string, any>,
+  TControls extends Record<string, any>,
   TParentStates extends string = '',
   TSiblingStates extends string = '',
   TChildStates extends string = ''
 > {
   constructor(
     protected scene: Phaser.Scene,
+    protected gameSettings: TGameSettings,
+    protected gameState: TGameState,
+    protected controls: TControls,
     protected stateManager: StateManager<TParentStates, TSiblingStates>,
     childConfig?: {
       childStateClasses: Record<TChildStates, Class>
@@ -30,13 +36,19 @@ export abstract class StateContainer<
         // (prev: Record<TChildStates, StateContainer<TSiblingStates, TChildStates>>, [k, v]: [TChildStates, any]) => {
         // TODO: Can't get the types quite right here but the code works
         (prev: any, [siblingStateKey, siblingClass]: [any, any]) => {
-          prev[siblingStateKey] = new siblingClass(scene, childStateManager) as StateContainer<
-            TSiblingStates,
-            TChildStates
-          >
+          prev[siblingStateKey] = new siblingClass(
+            scene,
+            gameSettings,
+            gameState,
+            controls,
+            childStateManager
+          ) as StateContainer<TGameSettings, TGameState, TControls, TParentStates, TSiblingStates, TChildStates>
           return prev
         },
-        {} as Record<TChildStates, StateContainer<TSiblingStates, TChildStates>>
+        {} as Record<
+          TChildStates,
+          StateContainer<TGameSettings, TGameState, TControls, TParentStates, TSiblingStates, TChildStates>
+        >
       )
 
       this.startingChildState = childConfig.startingChildState
@@ -46,9 +58,12 @@ export abstract class StateContainer<
   startingChildState: TChildStates | undefined = undefined
   nextChildState: TChildStates | undefined = undefined
   childState: TChildStates | undefined = undefined
-  childStateInstances?: Record<TChildStates, StateContainer<TSiblingStates, TChildStates>>
+  childStateInstances?: Record<
+    TChildStates,
+    StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates>
+  >
 
-  get childInstance(): StateContainer<TSiblingStates, TChildStates> | undefined {
+  get childInstance(): StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates> | undefined {
     if (this.childState && this.childStateInstances) {
       return this.childStateInstances[this.childState]
     }

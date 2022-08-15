@@ -4,6 +4,8 @@ import game from './game'
 import over from './over'
 import title from './title'
 import { StateContainer, StateManager } from '../engine'
+import { GameSettings, GameState } from '../settings'
+import { Controls } from '../controls'
 
 /*
 TOPSTATE --
@@ -17,9 +19,15 @@ TOPSTATE --
 
 export type MainStates = 'title' | 'game' | 'over'
 
-export class TopState extends StateContainer<'', '', MainStates> {
-  constructor(scene: Phaser.Scene, stateManager: StateManager<'', ''>) {
-    super(scene, stateManager, {
+export class TopState extends StateContainer<GameSettings, GameState, Controls, '', '', MainStates> {
+  constructor(
+    scene: Phaser.Scene,
+    gameSettings: GameSettings,
+    gameState: GameState,
+    controls: Controls,
+    stateManager: StateManager<'', ''>
+  ) {
+    super(scene, gameSettings, gameState, controls, stateManager, {
       childStateClasses: {
         game,
         over,

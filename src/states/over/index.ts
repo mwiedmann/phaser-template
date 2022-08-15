@@ -1,23 +1,29 @@
 import * as Phaser from 'phaser'
 import { MainStates } from '..'
-import { controls } from '../../controls'
-import { worldSettings } from '../../settings'
+import { GameSettings, GameState } from '../../settings'
 import { StateContainer, StateManager } from '../../engine'
 import { textStyle } from '../styles'
+import { Controls } from '../../controls'
 
-export class GameOver extends StateContainer<'', MainStates> {
-  constructor(scene: Phaser.Scene, stateManager: StateManager<'', MainStates>) {
-    super(scene, stateManager)
+export class GameOver extends StateContainer<GameSettings, GameState, Controls, '', MainStates> {
+  constructor(
+    scene: Phaser.Scene,
+    gameSettings: GameSettings,
+    gameState: GameState,
+    controls: Controls,
+    stateManager: StateManager<'', MainStates>
+  ) {
+    super(scene, gameSettings, gameState, controls, stateManager)
   }
 
   gameOverText?: Phaser.GameObjects.Text
 
   override init() {
     this.gameOverText = this.scene.add
-      .text(worldSettings.fieldWidthMid, worldSettings.fieldHeightMid, 'GAME OVER', textStyle)
+      .text(this.gameSettings.fieldWidthMid, this.gameSettings.fieldHeightMid, 'GAME OVER', textStyle)
       .setOrigin(0.5, 0.5)
 
-    controls.p1Shoot.on('down', () => {
+    this.controls.p1Shoot.on('down', () => {
       this.stateManager.stateChange('game')
     })
   }
@@ -28,7 +34,7 @@ export class GameOver extends StateContainer<'', MainStates> {
 
   override cleanup() {
     this.gameOverText?.destroy()
-    controls.p1Shoot.removeAllListeners()
+    this.controls.p1Shoot.removeAllListeners()
   }
 }
 

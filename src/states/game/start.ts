@@ -1,13 +1,20 @@
 import * as Phaser from 'phaser'
 import { GameChildStates } from '.'
 import { MainStates } from '..'
-import { worldSettings } from '../../settings'
+import { Controls } from '../../controls'
 import { StateContainer, StateManager } from '../../engine'
+import { GameSettings, GameState } from '../../settings'
 import { textStyle } from '../styles'
 
-export class Start extends StateContainer<MainStates, GameChildStates> {
-  constructor(scene: Phaser.Scene, stateManager: StateManager<MainStates, GameChildStates>) {
-    super(scene, stateManager)
+export class Start extends StateContainer<GameSettings, GameState, Controls, MainStates, GameChildStates> {
+  constructor(
+    scene: Phaser.Scene,
+    gameSettings: GameSettings,
+    gameState: GameState,
+    controls: Controls,
+    stateManager: StateManager<MainStates, GameChildStates>
+  ) {
+    super(scene, gameSettings, gameState, controls, stateManager)
   }
 
   startText!: Phaser.GameObjects.Text
@@ -16,10 +23,10 @@ export class Start extends StateContainer<MainStates, GameChildStates> {
 
   override init() {
     this.startText = this.scene.add
-      .text(worldSettings.fieldWidthMid, worldSettings.fieldHeightMid, 'Game:Main Starting in', textStyle)
+      .text(this.gameSettings.fieldWidthMid, this.gameSettings.fieldHeightMid, 'Game:Main Starting in', textStyle)
       .setOrigin(0.5, 0.5)
     this.countText = this.scene.add
-      .text(worldSettings.fieldWidthMid, worldSettings.fieldHeightMid + 50, '3', textStyle)
+      .text(this.gameSettings.fieldWidthMid, this.gameSettings.fieldHeightMid + 50, '3', textStyle)
       .setOrigin(0.5, 0.5)
     this.countStopTime = this.scene.time.now + 3000
   }

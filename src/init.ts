@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { worldSettings } from './settings'
+import { gameSettings, gameState } from './settings'
 import { initControls } from './controls'
 import { TopState } from './states'
 import { createPrimaryStateContainer } from './engine'
@@ -7,11 +7,11 @@ import { createPrimaryStateContainer } from './engine'
 export class GameScene extends Phaser.Scene {
   constructor() {
     super('game-scene')
-
-    this.topState = createPrimaryStateContainer(this, TopState)
   }
 
-  topState: TopState
+  // We set this in 'create', mark with ! so we can ignore undefined warnings
+  // You can also just make this a `let topState: TopState` in this file if you prefer
+  topState!: TopState
 
   /** Load all the images we need and assign them names */
   preload() {
@@ -21,7 +21,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    initControls(this)
+    const controls = initControls(this)
+    this.topState = createPrimaryStateContainer(this, gameSettings, gameState, controls, TopState)
+
     this.topState._init()
   }
 
@@ -35,8 +37,8 @@ export class GameScene extends Phaser.Scene {
 export const startGame = () => {
   new Phaser.Game({
     type: Phaser.AUTO,
-    width: worldSettings.screenWidth,
-    height: worldSettings.screenHeight,
+    width: gameSettings.screenWidth,
+    height: gameSettings.screenHeight,
     scale: {
       mode: Phaser.Scale.ScaleModes.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH

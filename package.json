@@ -25,7 +25,7 @@
     "webpack-dev-server": "4.9.2"
   },
   "scripts": {
-    "start": "webpack-dev-server --config webpack.js --mode development --host localhost --port 3030 --progress",
+    "start": "webpack-dev-server --config webpack.js --mode development --host localhost --port 3000 --progress",
     "prod": "webpack-dev-server --config webpack.js --mode production --host localhost --port 3000 --progress",
     "build": "yarn webpack --config webpack.js --mode production"
   }

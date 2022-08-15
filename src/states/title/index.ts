@@ -1,20 +1,26 @@
 import * as Phaser from 'phaser'
 import { MainStates } from '..'
-import { controls } from '../../controls'
-import { worldSettings } from '../../settings'
+import { Controls } from '../../controls'
 import { StateContainer, StateManager } from '../../engine'
+import { GameSettings, GameState } from '../../settings'
 
-export class Title extends StateContainer<'', MainStates> {
-  constructor(scene: Phaser.Scene, stateManager: StateManager<'', MainStates>) {
-    super(scene, stateManager)
+export class Title extends StateContainer<GameSettings, GameState, Controls, '', MainStates> {
+  constructor(
+    scene: Phaser.Scene,
+    gameSettings: GameSettings,
+    gameState: GameState,
+    controls: Controls,
+    stateManager: StateManager<'', MainStates>
+  ) {
+    super(scene, gameSettings, gameState, controls, stateManager)
   }
 
   titleScreen?: Phaser.GameObjects.Image
 
   override init() {
-    this.titleScreen = this.scene.add.image(worldSettings.fieldWidthMid, worldSettings.fieldHeightMid, 'title')
+    this.titleScreen = this.scene.add.image(this.gameSettings.fieldWidthMid, this.gameSettings.fieldHeightMid, 'title')
 
-    controls.p1Shoot.on('down', () => {
+    this.controls.p1Shoot.on('down', () => {
       this.stateManager.stateChange('game')
     })
   }
@@ -25,7 +31,7 @@ export class Title extends StateContainer<'', MainStates> {
 
   override cleanup() {
     this.titleScreen?.destroy()
-    controls.p1Shoot.removeAllListeners()
+    this.controls.p1Shoot.removeAllListeners()
   }
 }
 
