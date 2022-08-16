@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { StateManager } from './types'
+import { StateContainerClass, StateManager } from './types'
 
 export abstract class StateContainer<
   TGameSettings extends Record<string, any>,
@@ -7,7 +7,8 @@ export abstract class StateContainer<
   TControls extends Record<string, any>,
   TParentStates extends string = '',
   TSiblingStates extends string = '',
-  TChildStates extends string = ''
+  TChildStates extends string = '',
+  TGrandchildStates extends string = ''
 > {
   constructor(
     protected scene: Phaser.Scene,
@@ -16,40 +17,40 @@ export abstract class StateContainer<
     protected controls: TControls,
     protected stateManager: StateManager<TParentStates, TSiblingStates>,
     childConfig?: {
-      childStateClasses: Record<TChildStates, Class>
+      childStateClasses: Record<
+        TChildStates,
+        StateContainerClass<
+          StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates, TGrandchildStates>,
+          TGameSettings,
+          TGameState,
+          TControls,
+          TSiblingStates,
+          TChildStates
+        >
+      >
       startingChildState: TChildStates
     }
   ) {
+    // If this state container has child states, instantiate them
     if (childConfig) {
       const childStateManager: StateManager<TSiblingStates, TChildStates> = {
         stateChange: (state: TChildStates) => {
-          this.log(`StateChange from:${this.childState} to:${state}`)
+          this.debug(`StateChange from:${this.childState} to:${state}`)
           this.nextChildState = state
         },
         exitState: (state: TSiblingStates) => {
-          this.log(`ExitState to:${state}`)
+          this.debug(`ExitState to:${state}`)
           this.stateManager.stateChange(state)
         }
       }
 
-      this.childStateInstances = Object.entries(childConfig.childStateClasses).reduce(
-        // (prev: Record<TChildStates, StateContainer<TSiblingStates, TChildStates>>, [k, v]: [TChildStates, any]) => {
-        // TODO: Can't get the types quite right here but the code works
-        (prev: any, [siblingStateKey, siblingClass]: [any, any]) => {
-          prev[siblingStateKey] = new siblingClass(
-            scene,
-            gameSettings,
-            gameState,
-            controls,
-            childStateManager
-          ) as StateContainer<TGameSettings, TGameState, TControls, TParentStates, TSiblingStates, TChildStates>
-          return prev
-        },
-        {} as Record<
-          TChildStates,
-          StateContainer<TGameSettings, TGameState, TControls, TParentStates, TSiblingStates, TChildStates>
-        >
-      )
+      // Go through the child state classes, instantiate them, and store the class instances
+      const keys = Object.keys(childConfig.childStateClasses) as TChildStates[]
+      this.childStateInstances = keys.reduce((prev, nextKey) => {
+        const siblingClass = childConfig.childStateClasses[nextKey]
+        prev[nextKey] = new siblingClass(scene, gameSettings, gameState, controls, childStateManager)
+        return prev
+      }, {} as Record<TChildStates, StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates, TGrandchildStates>>)
 
       this.startingChildState = childConfig.startingChildState
     }
@@ -60,10 +61,12 @@ export abstract class StateContainer<
   childState: TChildStates | undefined = undefined
   childStateInstances?: Record<
     TChildStates,
-    StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates>
+    StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates, TGrandchildStates>
   >
 
-  get childInstance(): StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates> | undefined {
+  get childInstance():
+    | StateContainer<TGameSettings, TGameState, TControls, TSiblingStates, TChildStates, TGrandchildStates>
+    | undefined {
     if (this.childState && this.childStateInstances) {
       return this.childStateInstances[this.childState]
     }
@@ -74,8 +77,14 @@ export abstract class StateContainer<
     console.log(this.constructor.name, ...args)
   }
 
+  debug(...args: any[]) {
+    if (this.gameSettings.debug) {
+      this.log(...args)
+    }
+  }
+
   _init() {
-    this.log('_init')
+    this.debug('_init')
     // Transition to the starting state
     this.nextChildState = this.startingChildState
     this.childState = this.startingChildState
@@ -97,7 +106,7 @@ export abstract class StateContainer<
   _stateChange() {
     this.childInstance?._stateChange()
     if (this.nextChildState !== this.childState) {
-      this.log(`Changing state from:${this.childState} to:${this.nextChildState}`)
+      this.debug(`Changing state from:${this.childState} to:${this.nextChildState}`)
       this.childInstance?._cleanup()
       this.childState = this.nextChildState
       this.childInstance?._init()
@@ -105,7 +114,7 @@ export abstract class StateContainer<
   }
 
   _cleanup() {
-    this.log('_cleanup')
+    this.debug('_cleanup')
     this.childInstance?._cleanup()
     this.cleanup()
 

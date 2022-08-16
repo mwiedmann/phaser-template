@@ -1,4 +1,5 @@
 export type GameSettings = {
+  debug: boolean
   screenWidth: number
   screenHeight: number
   gameCameraZoom: number
@@ -17,6 +18,7 @@ export type GameState = {
 }
 
 const baseWorldSettings = {
+  debug: true,
   screenWidth: 1024,
   screenHeight: 768,
   gameCameraZoom: 1

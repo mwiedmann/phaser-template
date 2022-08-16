@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { StateManager } from './types'
+import { StateContainerClass, StateManager } from './types'
 
 export const createPrimaryStateContainer = <
   T,
@@ -11,15 +11,7 @@ export const createPrimaryStateContainer = <
   gameSettings: TGameSettings,
   gameState: TGameState,
   controls: TControls,
-  primary: {
-    new (
-      scene: Phaser.Scene,
-      gameSettings: TGameSettings,
-      gameState: TGameState,
-      controls: TControls,
-      stateManager: StateManager
-    ): T
-  }
+  primary: StateContainerClass<T, TGameSettings, TGameState, TControls>
 ): T => {
   // State changes should not be called on the primary state container
   const stateManager: StateManager = {

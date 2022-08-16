@@ -19,7 +19,7 @@ TOPSTATE --
 
 export type MainStates = 'title' | 'game' | 'over'
 
-export class TopState extends StateContainer<GameSettings, GameState, Controls, '', '', MainStates> {
+export class TopState extends StateContainer<GameSettings, GameState, Controls, '', '', MainStates, any> {
   constructor(
     scene: Phaser.Scene,
     gameSettings: GameSettings,
@@ -29,9 +29,9 @@ export class TopState extends StateContainer<GameSettings, GameState, Controls, 
   ) {
     super(scene, gameSettings, gameState, controls, stateManager, {
       childStateClasses: {
-        game,
         over,
-        title
+        title,
+        game
       },
       startingChildState: 'title'
     })
